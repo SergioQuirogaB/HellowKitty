@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>¡Felicidades, Monaaa! - Juego Hello Kitty</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .kitty-image {
+            width: 70px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        /* Estilo para el certificado */
+        .certificate {
+            background: linear-gradient(145deg, #fbcfe8, #f9a8d4);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border: 2px solid #f472b6;
+        }
+
+        .certificate h2 {
+            font-size: 2.5rem;
+            color: #ec4899;
+        }
+
+        .certificate p {
+            font-size: 1.25rem;
+            color: #4b5563;
+        }
+
+        .certificate .signature {
+            font-size: 1.2rem;
+            font-style: italic;
+            color: #6b7280;
+        }
+
+        .certificate .footer {
+            font-size: 1rem;
+            color: #9ca3af;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-r from-pink-300 via-purple-400 to-indigo-500 text-center font-sans">
+
+    <!-- Pantalla de Bienvenida -->
+    <div class="container mx-auto px-4 py-6 fade-in" id="intro">
+        <header class="bg-white rounded-xl shadow-xl p-8 relative transform transition-all duration-300 ease-in-out hover:scale-105">
+            <h1 class="text-3xl sm:text-4xl font-bold text-pink-600">¡Hola, Monaaa! ¿Estás lista para jugar?</h1>
+            <img src="hk.png" alt="Hello Kitty" class="kitty-image sm:w-16 w-12 transition-all duration-300 transform hover:rotate-12">
+            <button class="mt-6 bg-gradient-to-r from-pink-500 to-purple-600 text-white py-3 px-6 rounded-full text-lg sm:text-xl hover:from-pink-600 hover:to-purple-700 transition-all duration-200 ease-in-out transform hover:scale-105" onclick="startGame()">¡Vamos a jugar!</button>
+        </header>
+    </div>
+
+    <!-- Juego de Preguntas -->
+    <div class="container mx-auto px-4 py-6 fade-in" id="game" style="display: none;">
+        <div class="bg-white rounded-xl shadow-xl p-8 transform transition-all duration-300 ease-in-out hover:scale-105">
+            <div class="text-2xl sm:text-3xl font-semibold text-pink-600" id="question"></div>
+            <div class="mt-6 space-y-4" id="options"></div>
+            <button id="next" class="mt-4 bg-gradient-to-r from-green-400 to-green-600 text-white py-2 px-4 rounded-full hover:from-green-500 hover:to-green-700 transition-all duration-200 ease-in-out transform hover:scale-105" style="display: none;" onclick="nextQuestion()">Siguiente pregunta</button>
+        </div>
+    </div>
+
+    <!-- Certificado -->
+    <div id="certificate" class="container mx-auto px-4 py-6 certificate fade-in" style="display: none;">
+        <h2>¡Felicidades, Monaaa!</h2>
+        <p>Has completado el juego con éxito. Este es tu certificado de triunfo. 🏆</p>
+        <img src="foto.webp" alt="Imagen personalizada de ustedes" class="mt-6 mx-auto sm:w-32 w-24 rounded-full shadow-lg">
+        <p class="mt-4 text-lg text-gray-600">¡Siempre serás una experta en el mundo de Hello Kitty! 🌸</p>
+        <img src="hk.png" alt="Hello Kitty" class="kitty-image sm:w-16 w-12 transition-all duration-300 transform hover:rotate-12">
+        <p class="mt-8 signature">Con cariño, Quiro jsjs</p>
+        <p class="footer">¡Comparte tu logro con el mundo! 📲</p>
+    </div>
+
+    <script>
+        // Variables para el juego
+        const questions = [
+            {
+                question: "¿Quién es la mejor amiga de Hello Kitty?",
+                options: ["My Melody", "Keroppi", "Badtz-Maru", "Cinnamoroll"],
+                answer: "My Melody"
+            },
+            {
+                question: "¿Qué animal es Hello Kitty?",
+                options: ["Gato", "Perro", "Conejo", "Osito"],
+                answer: "Gato"
+            },
+            {
+                question: "¿En qué año nació Hello Kitty?",
+                options: ["1974", "1980", "1992", "2000"],
+                answer: "1974"
+            },
+            {
+                question: "¿Cómo se llama el hermano de Hello Kitty?",
+                options: ["Dear Daniel", "Chococat", "Badtz-Maru", "Pochacco"],
+                answer: "Dear Daniel"
+            },
+            {
+                question: "¿Cuál es el color de la camiseta de Hello Kitty?",
+                options: ["Rojo", "Azul", "Verde", "Amarillo"],
+                answer: "Rojo"
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+
+        // Función para iniciar el juego
+        function startGame() {
+            document.getElementById("intro").style.display = "none";
+            document.getElementById("game").style.display = "block";
+            loadQuestion();
+        }
+
+        // Función para cargar la pregunta
+        function loadQuestion() {
+            const q = questions[currentQuestion];
+            document.getElementById("question").innerText = q.question;
+            const optionsHTML = q.options.map(option => {
+                return `<button class="bg-gradient-to-r from-pink-500 to-pink-600 text-white py-2 px-4 rounded-full hover:from-pink-600 hover:to-pink-700 transition-all duration-200 ease-in-out transform hover:scale-105" onclick="checkAnswer('${option}')">${option}</button>`;
+            }).join('');
+            document.getElementById("options").innerHTML = optionsHTML;
+        }
+
+        // Función para comprobar la respuesta
+        function checkAnswer(selectedAnswer) {
+            const correctAnswer = questions[currentQuestion].answer;
+            if (selectedAnswer === correctAnswer) {
+                score++;
+                showResult(true);
+            } else {
+                showResult(false);
+            }
+        }
+
+        // Mostrar el resultado después de cada respuesta
+        function showResult(isCorrect) {
+            const resultText = isCorrect ? "¡Vamos mamona, sí se puede!" : "Qué pendeja, no es la respuesta correcta.";
+            const resultClass = isCorrect ? "text-green-600" : "text-red-600";
+            document.getElementById("options").innerHTML = `<div class="text-xl sm:text-2xl font-semibold ${resultClass}">${resultText}</div>`;
+            document.getElementById("next").style.display = "inline-block";
+        }
+
+        // Función para cargar la siguiente pregunta
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                loadQuestion();
+                document.getElementById("next").style.display = "none";
+            } else {
+                endGame();
+            }
+        }
+
+        // Función para terminar el juego
+        function endGame() {
+            document.getElementById("game").style.display = "none";
+            document.getElementById("certificate").style.display = "block";
+            if (score === 5) {
+                document.getElementById("certificate").innerHTML += "<p class='mt-4 text-lg sm:text-xl text-green-600'>¡Increíble, respondiste todas las preguntas correctamente!</p>";
+            } else {
+                document.getElementById("certificate").innerHTML += "<p class='mt-4 text-lg sm:text-xl text-gray-600'>¡Bien hecho, pero la próxima vez puede que consigas todos los puntos!</p>";
+            }
+        }
+    </script>
+</body>
+</html>
