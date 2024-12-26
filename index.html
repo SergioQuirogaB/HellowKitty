@@ -23,6 +23,12 @@
             100% { opacity: 1; }
         }
 
+        /* Efectos de animación y transiciones */
+        .button-hover:hover {
+            transform: scale(1.05);
+            transition: transform 0.2s ease-in-out;
+        }
+
         /* Estilo para el certificado */
         .certificate {
             background: linear-gradient(145deg, #fbcfe8, #f9a8d4);
@@ -53,6 +59,40 @@
             font-size: 1rem;
             color: #9ca3af;
         }
+
+        /* Estilo para el temporizador */
+        .timer {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ec4899;
+        }
+
+        /* Reacciones de respuesta */
+        .correct-answer {
+            color: #10b981;
+            font-size: 1.25rem;
+            animation: bounce 0.5s ease-out;
+        }
+
+        .wrong-answer {
+            color: #ef4444;
+            font-size: 1.25rem;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes bounce {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0); }
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
     </style>
 </head>
 <body class="bg-gradient-to-r from-pink-300 via-purple-400 to-indigo-500 text-center font-sans">
@@ -62,7 +102,7 @@
         <header class="bg-white rounded-xl shadow-xl p-8 relative transform transition-all duration-300 ease-in-out hover:scale-105">
             <h1 class="text-3xl sm:text-4xl font-bold text-pink-600">¡Hola, Monaaa! ¿Estás lista para jugar?</h1>
             <img src="hk.png" alt="Hello Kitty" class="kitty-image sm:w-16 w-12 transition-all duration-300 transform hover:rotate-12">
-            <button class="mt-6 bg-gradient-to-r from-pink-500 to-purple-600 text-white py-3 px-6 rounded-full text-lg sm:text-xl hover:from-pink-600 hover:to-purple-700 transition-all duration-200 ease-in-out transform hover:scale-105" onclick="startGame()">¡Vamos a jugar!</button>
+            <button class="mt-6 bg-gradient-to-r from-pink-500 to-purple-600 text-white py-3 px-6 rounded-full text-lg sm:text-xl button-hover" onclick="startGame()">¡Vamos a jugar!</button>
         </header>
     </div>
 
@@ -71,7 +111,8 @@
         <div class="bg-white rounded-xl shadow-xl p-8 transform transition-all duration-300 ease-in-out hover:scale-105">
             <div class="text-2xl sm:text-3xl font-semibold text-pink-600" id="question"></div>
             <div class="mt-6 space-y-4" id="options"></div>
-            <button id="next" class="mt-4 bg-gradient-to-r from-green-400 to-green-600 text-white py-2 px-4 rounded-full hover:from-green-500 hover:to-green-700 transition-all duration-200 ease-in-out transform hover:scale-105" style="display: none;" onclick="nextQuestion()">Siguiente pregunta</button>
+            <div class="mt-4 timer" id="timer"></div>
+            <button id="next" class="mt-4 bg-gradient-to-r from-green-400 to-green-600 text-white py-2 px-4 rounded-full hover:from-green-500 hover:to-green-700 transition-all duration-200 ease-in-out transform hover:scale-105 button-hover" style="display: none;" onclick="nextQuestion()">Siguiente pregunta</button>
         </div>
     </div>
 
@@ -118,12 +159,15 @@
 
         let currentQuestion = 0;
         let score = 0;
+        let timer;
+        let timeLeft = 15;
 
         // Función para iniciar el juego
         function startGame() {
             document.getElementById("intro").style.display = "none";
             document.getElementById("game").style.display = "block";
             loadQuestion();
+            startTimer();
         }
 
         // Función para cargar la pregunta
@@ -131,13 +175,26 @@
             const q = questions[currentQuestion];
             document.getElementById("question").innerText = q.question;
             const optionsHTML = q.options.map(option => {
-                return `<button class="bg-gradient-to-r from-pink-500 to-pink-600 text-white py-2 px-4 rounded-full hover:from-pink-600 hover:to-pink-700 transition-all duration-200 ease-in-out transform hover:scale-105" onclick="checkAnswer('${option}')">${option}</button>`;
+                return `<button class="bg-gradient-to-r from-pink-500 to-pink-600 text-white py-2 px-4 rounded-full hover:from-pink-600 hover:to-pink-700 transition-all duration-200 ease-in-out transform hover:scale-105 button-hover" onclick="checkAnswer('${option}')">${option}</button>`;
             }).join('');
             document.getElementById("options").innerHTML = optionsHTML;
         }
 
+        // Inicia el temporizador
+        function startTimer() {
+            timer = setInterval(function() {
+                timeLeft--;
+                document.getElementById("timer").innerText = `Tiempo restante: ${timeLeft}s`;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    checkAnswer(null);
+                }
+            }, 1000);
+        }
+
         // Función para comprobar la respuesta
         function checkAnswer(selectedAnswer) {
+            clearInterval(timer);
             const correctAnswer = questions[currentQuestion].answer;
             if (selectedAnswer === correctAnswer) {
                 score++;
@@ -150,7 +207,7 @@
         // Mostrar el resultado después de cada respuesta
         function showResult(isCorrect) {
             const resultText = isCorrect ? "¡Vamos mamona, sí se puede!" : "Qué pendeja, no es la respuesta correcta.";
-            const resultClass = isCorrect ? "text-green-600" : "text-red-600";
+            const resultClass = isCorrect ? "correct-answer" : "wrong-answer";
             document.getElementById("options").innerHTML = `<div class="text-xl sm:text-2xl font-semibold ${resultClass}">${resultText}</div>`;
             document.getElementById("next").style.display = "inline-block";
         }
@@ -159,8 +216,10 @@
         function nextQuestion() {
             currentQuestion++;
             if (currentQuestion < questions.length) {
+                timeLeft = 15; // Resetear el temporizador
                 loadQuestion();
                 document.getElementById("next").style.display = "none";
+                startTimer();  // Comienza de nuevo el temporizador
             } else {
                 endGame();
             }
